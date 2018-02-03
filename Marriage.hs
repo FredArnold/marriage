@@ -43,7 +43,7 @@ propose :: (Num man, Ix man, Ix woman)
             -> MatchingProg man woman
             -> woman
             -> MatchingProg man woman
-propose (MatchingEnv boundsM _ _ prefsW) (MatchingProg currentEngs allProps pos) w =
+-propose (MatchingEnv boundsM _ _ prefsW) (MatchingProg currentEngs allProps pos) w =
     let newEngs = case filter ((== Just w) . snd) $ assocs currentEngs of
                     [] -> currentEngs // [(pos, Just w)]
                     (oldGuy, _) : [] -> case prefsW ! w of
@@ -82,8 +82,8 @@ simple =
         boundsW = (1, 10)
     in MatchingEnv boundsM boundsW (listArray boundsM $ repeat [1 .. 10]) (listArray boundsW $ repeat [1 .. 10])
 
-sndExample :: MatchingEnv Int Integer
-sndExample =
+GaleShapleyExample :: MatchingEnv Int Integer
+GaleShapleyExample =
     let prefsM = listArray (1, 3) [[1, 2, 3], [2, 3, 1], [3, 1, 2]]
         prefsW = listArray (1, 3) [[2, 3, 1], [3, 1, 2], [1, 2, 3]]
     in MatchingEnv (1, 3) (1, 3) prefsM prefsW
