@@ -26,8 +26,7 @@ stableMatch :: (Num man, Ix man, Ix woman)
             -> [(man, woman)]
 stableMatch env = -- TODO : no partial functions here
     let initial = newMatchingProg env
-        result = until everyoneHasBeenMatched (iterateMatching env) initial
-        result2 = untilJust extractMarriages3 (iterateMatching env) initial
+        result2 = untilJust extractMarriages (iterateMatching env) initial
     in result2
 
 iterateMatching :: (Num man, Ix man, Ix woman)
@@ -81,20 +80,8 @@ everyoneHasBeenMatched :: (Num man, Ix man, Ix woman) => MatchingProg man woman 
 everyoneHasBeenMatched (MatchingProg arr _ _) =
     all isJust $ elems arr
                   
-extractMarriages :: (Ix man, Ix woman) => MatchingProg man woman -> [(man, woman)]
+extractMarriages :: (Ix man, Ix woman) => MatchingProg man woman -> Maybe [(man, woman)]
 extractMarriages (MatchingProg engMapping _ _) =
-    fmap (\(a, Just b) -> (a, b)) $ assocs engMapping
-
-extractMarriages2 :: (Ix man, Ix woman) => MatchingProg man woman -> Maybe [(man, woman)]
-extractMarriages2 (MatchingProg engMapping _ _) =
-    let engagements = fmap (\case
-                                 (a, Just b) -> Just (a, b)
-                                 (_, Nothing) -> Nothing
-                           ) $ assocs engMapping
-    in sequence engagements
-
-extractMarriages3 :: (Ix man, Ix woman) => MatchingProg man woman -> Maybe [(man, woman)]
-extractMarriages3 (MatchingProg engMapping _ _) =
     sequence $ sequence <$> assocs engMapping
        
 simple :: MatchingEnv Int Integer
