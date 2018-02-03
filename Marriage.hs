@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Marriage where
 
 import Data.Array
@@ -25,7 +27,8 @@ stableMatch :: (Num man, Ix man, Ix woman)
 stableMatch env = -- TODO : no partial functions here
     let initial = newMatchingProg env
         result = until everyoneHasBeenMatched (iterateMatching env) initial
-    in extractMarriages result
+        result2 = untilJust extractMarriages3 (iterateMatching env) initial
+    in result2
 
 iterateMatching :: (Num man, Ix man, Ix woman)
             => MatchingEnv man woman
@@ -43,7 +46,7 @@ propose :: (Num man, Ix man, Ix woman)
             -> MatchingProg man woman
             -> woman
             -> MatchingProg man woman
--propose (MatchingEnv boundsM _ _ prefsW) (MatchingProg currentEngs allProps pos) w =
+propose (MatchingEnv boundsM _ _ prefsW) (MatchingProg currentEngs allProps pos) w =
     let newEngs = case filter ((== Just w) . snd) $ assocs currentEngs of
                     [] -> currentEngs // [(pos, Just w)]
                     (oldGuy, _) : [] -> case prefsW ! w of
@@ -60,7 +63,13 @@ nextPos (lower, upper) a =
     if upper == a then
         lower else
         a + 1
-       
+
+untilJust :: (a -> Maybe b) -> (a -> a) -> a -> b
+untilJust f g a =
+    case f a of
+      Just b -> b
+      Nothing -> untilJust f g $ g a
+             
 newMatchingProg :: (Ix man, Ix woman) => MatchingEnv man woman -> MatchingProg man woman
 newMatchingProg (MatchingEnv boundsM boundsW _ _) =
     MatchingProg
@@ -76,14 +85,26 @@ extractMarriages :: (Ix man, Ix woman) => MatchingProg man woman -> [(man, woman
 extractMarriages (MatchingProg engMapping _ _) =
     fmap (\(a, Just b) -> (a, b)) $ assocs engMapping
 
+extractMarriages2 :: (Ix man, Ix woman) => MatchingProg man woman -> Maybe [(man, woman)]
+extractMarriages2 (MatchingProg engMapping _ _) =
+    let engagements = fmap (\case
+                                 (a, Just b) -> Just (a, b)
+                                 (_, Nothing) -> Nothing
+                           ) $ assocs engMapping
+    in sequence engagements
+
+extractMarriages3 :: (Ix man, Ix woman) => MatchingProg man woman -> Maybe [(man, woman)]
+extractMarriages3 (MatchingProg engMapping _ _) =
+    sequence $ sequence <$> assocs engMapping
+       
 simple :: MatchingEnv Int Integer
 simple =
     let boundsM = (1, 10)
         boundsW = (1, 10)
     in MatchingEnv boundsM boundsW (listArray boundsM $ repeat [1 .. 10]) (listArray boundsW $ repeat [1 .. 10])
 
-GaleShapleyExample :: MatchingEnv Int Integer
-GaleShapleyExample =
+galeShapleyExample :: MatchingEnv Int Integer
+galeShapleyExample =
     let prefsM = listArray (1, 3) [[1, 2, 3], [2, 3, 1], [3, 1, 2]]
         prefsW = listArray (1, 3) [[2, 3, 1], [3, 1, 2], [1, 2, 3]]
     in MatchingEnv (1, 3) (1, 3) prefsM prefsW
