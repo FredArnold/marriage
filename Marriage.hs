@@ -90,8 +90,24 @@ simple =
         boundsW = (1, 10)
     in MatchingEnv boundsM boundsW (listArray boundsM $ repeat [1 .. 10]) (listArray boundsW $ repeat [1 .. 10])
 
-galeShapleyExample :: MatchingEnv Int Integer
-galeShapleyExample =
+example3by3 :: MatchingEnv Int Integer
+example3by3 =
     let prefsM = listArray (1, 3) [[1, 2, 3], [2, 3, 1], [3, 1, 2]]
         prefsW = listArray (1, 3) [[2, 3, 1], [3, 1, 2], [1, 2, 3]]
     in MatchingEnv (1, 3) (1, 3) prefsM prefsW
+
+example4by4 :: MatchingEnv Int Integer
+example4by4 =
+    let prefsM = listArray (1, 4)
+                 [ [1, 2, 3, 4]
+                 , [1, 4, 3, 2]
+                 , [2, 1, 3, 4]
+                 , [4, 2, 3, 1]
+                 ]
+        prefsW = listArray (1, 4)
+                 [ [4, 3, 1, 2]
+                 , [2, 4, 1, 3]
+                 , [4, 1, 2, 3]
+                 , [3, 2, 1, 4]
+                 ]
+    in MatchingEnv (1, 4) (1, 4) prefsM prefsW
